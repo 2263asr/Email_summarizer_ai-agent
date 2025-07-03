@@ -1,0 +1,174 @@
+{
+  "name": "Email summarizer",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 1,
+        "filters": {
+          "labelIds": [
+            "UNREAD"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        220,
+        0
+      ],
+      "id": "582a81bc-7cfb-4b7b-a2cd-98b3f21043a6",
+      "name": "Gmail",
+      "webhookId": "182a4aa9-a2a0-434a-a78d-ae5edfdc0a05",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "u18hcX4nrPlTtJdv",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an assistant that summarizes emails in a clear and short way.\n\nSummarize this email for me:{{ $json.snippet }}\n\n##Subject should be in the summary\n\n##Sender information should be in the summary",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=##Each email should summarized once "
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        440,
+        0
+      ],
+      "id": "c938c6b1-be32-43a0-9abc-de357aa30ffc",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        400,
+        220
+      ],
+      "id": "a32d957e-0200-43a1-806d-240ae88c15a0",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "OKVAxj3gTFztW0i8",
+          "name": "OpenRouter account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pageId": {
+          "__rl": true,
+          "value": "https://www.notion.so/Summarized-Emails-2220c626726780d5b5cdeadb79b38295?source=copy_link",
+          "mode": "url"
+        },
+        "title": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        860,
+        0
+      ],
+      "id": "0ca01112-18de-4165-a508-3daf5872ac87",
+      "name": "Notion",
+      "credentials": {
+        "notionApi": {
+          "id": "sKYaAjZcuGNwt1a6",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "19b39d0c-f81d-41e0-a007-9ea155220219",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fab27215-b7cf-4d6d-9ec9-8931a49aed73",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e2689d78b9e5cecf9181acc84b8ce173ba15da69bbc4887e42c7ac65875dbd95"
+  },
+  "id": "RMMVTqvJkcwp7Zyl",
+  "tags": []
+}
